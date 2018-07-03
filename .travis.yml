@@ -15,7 +15,7 @@ install:
   - sudo apt-get install -y libeigen3-dev libglew-dev libc++-dev libwayland-dev libxkbcommon-dev libegl1-mesa-dev
   - sudo apt-get install -y cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
   - sudo apt-get install -y python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev
-  - sudo apt-get install -y sudo apt-get install libspdlog-dev
+  - sudo apt-get install -y libspdlog-dev
   
   # Download v3.0.0 .zip file and extract.
   - curl -sL https://github.com/Itseez/opencv/archive/3.0.0-beta.zip > opencv.zip
