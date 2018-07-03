@@ -18,7 +18,7 @@ if(NOT OpenCV_FOUND)
    endif()
 endif()
 
-find_package(Eigen3 3.1.0 REQUIRED)
+# find_package(Eigen3 3.1.0 REQUIRED)
 find_package(Pangolin 0.4 REQUIRED)
 
 include_directories(
