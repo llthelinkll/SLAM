@@ -8,6 +8,10 @@ SLAM by by Mos
 ```
 $ sudo apt-get install libeigen3-dev
 ```
+4. [spdlog](https://github.com/gabime/spdlog)
+```
+sudo apt-get install libspdlog-dev
+```
 
 # How to build
 ```cmd

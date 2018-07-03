@@ -13,10 +13,12 @@ int main(int argc, char const *argv[]) {
   
   Viewer* viewer = new Viewer(map);
   
-  map->addMapPoint(new MapPoint(1.0f,2.0f,3.0f) );
-  map->addMapPoint(new MapPoint(0.0f,0.0f,1.0f) );
-  map->addMapPoint(new MapPoint(1.0f,1.0f,0.4f) );
-  map->addMapPoint(new MapPoint(1.0f,0.4f,0.2f) );
+  map->addMapPoint(new MapPoint(1.0f,0.0f,0.0f) );
+  map->addMapPoint(new MapPoint(2.0f,0.0f,0.0f) );
+  map->addMapPoint(new MapPoint(3.0f,0.0f,0.0f) );
+  map->addMapPoint(new MapPoint(4.0f,0.0f,0.0f) );
+  map->addMapPoint(new MapPoint(5.0f,0.0f,0.0f) );
+  map->addMapPoint(new MapPoint(6.0f,0.0f,0.0f) );
   
   std::thread thread = std::thread(&Viewer::run,viewer);
   

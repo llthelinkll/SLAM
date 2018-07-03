@@ -12,8 +12,7 @@ MapPoint::MapPoint(cv::Mat& mat){
 
 MapPoint::MapPoint(float x,float y,float z){
   float tmp[3] = {x,y,z};
-  mWorldPos = cv::Mat(3,1,CV_32F,tmp);
-  std::cout << mWorldPos << '\n';
+  mWorldPos = cv::Mat(3,1,CV_32F,tmp).clone();
 }
 
 cv::Mat&
