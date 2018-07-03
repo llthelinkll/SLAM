@@ -2,6 +2,7 @@
 #define SLAM_MAP_H
 
 #include <vector>
+#include <mutex>
 
 namespace SLAM{
     
@@ -14,7 +15,10 @@ namespace SLAM{
       
       // add new MapPoint
       void addMapPoint(MapPoint*);
+      std::vector<MapPoint*>& getMapPoints();
       
+      // DO NOT UPDATE this Map when someone is updating it
+      std::mutex mMutexMap;
     protected:
       std::vector<MapPoint*> mvpMapPoints;
     };

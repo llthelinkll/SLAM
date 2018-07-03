@@ -13,7 +13,7 @@ MapDrawer::MapDrawer(Map* map) : mMap(map){
 void
 MapDrawer::drawMapPoints(){
   
-  std::vector<MapPoint*>& mapPoints = mMap->mvpMapPoints;
+  std::vector<MapPoint*>& mapPoints = mMap->getMapPoints();
   
   glPointSize(5);
   glBegin(GL_POINTS);
