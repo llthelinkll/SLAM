@@ -7,6 +7,7 @@
 #include <fstream>
 #include <sstream>
 #include <opencv2/opencv.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 #include <signal.h>
 #include <stdlib.h>
