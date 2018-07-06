@@ -10,6 +10,8 @@ namespace SLAM{
       MapPoint(cv::Mat&);
       MapPoint(float x,float y,float z);
       
+      ~MapPoint();
+      
       cv::Mat& getWorldPos();
       
     private:

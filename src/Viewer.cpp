@@ -4,14 +4,23 @@
 #include <pangolin/scene/axis.h>
 
 #include <MapDrawer.h>
+#include <FrameDrawer.h>
 #include <Map.h>
 #include <MapPoint.h>
+#include <opencv2/opencv.hpp>
 
 
 using namespace SLAM;
 
 Viewer::Viewer(Map* map) : mMap(map){
   mMapDrawer = new MapDrawer(mMap);
+  mFrameDrawer = new FrameDrawer();
+  mRequestFinish = false;
+}
+
+Viewer::~Viewer(){
+  delete(mMapDrawer);
+  delete(mFrameDrawer);
 }
 
 void
@@ -55,7 +64,7 @@ Viewer::run(){
   pangolin::Var<double> inputY("ui.Y",0,-10,10);
   pangolin::Var<double> inputZ("ui.Z",0,-10,10);
       
-  while( !pangolin::ShouldQuit() )
+  while( !pangolin::ShouldQuit() && !mRequestFinish )
   {
       // add new point from UI
       if( pangolin::Pushed(addButton) ){
@@ -69,8 +78,21 @@ Viewer::run(){
       
       // Render OpenGL Cube
       mMapDrawer->drawMapPoints();
-
+      mFrameDrawer->drawFrame();
+      
+      cv::waitKey(20);
+      
       // Swap frames and Process Events
       pangolin::FinishFrame();
   }
+}
+
+void 
+Viewer::updateFrame(const cv::Mat& image){
+  mFrameDrawer->updateFrame(image);
+}
+
+void
+Viewer::requestFinish(){
+  mRequestFinish = true;
 }
