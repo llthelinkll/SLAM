@@ -1,35 +1,25 @@
-sudo: required
-
-language: ruby
-
-services:
-  - docker
-
 before_install:
 - docker pull carlad/sinatra
 - docker run -d -p 127.0.0.1:80:4567 carlad/sinatra /bin/sh -c "cd /root/sinatra; bundle exec foreman start;"
 - docker ps -a
 - docker run carlad/sinatra /bin/sh -c "cd /root/sinatra; bundle exec rake test"
 
-script:
-- bundle exec rake test
+language: cpp
 
-# language: cpp
-# 
-# sudo: required
-# 
-# cache: ccache
-# 
-# services:
-#   - docker
-# 
-# compiler:
-#   - gcc
-# 
-# before_install:
-#   - sudo apt-get update
-  # - docker pull thelink/slam
-  # - docker run -itd --name slam thelink/slam
+sudo: required
+
+cache: ccache
+
+services:
+  - docker
+
+compiler:
+  - gcc
+
+before_install:
+  - sudo apt-get update
+  - docker pull thelink/slam
+  - docker run -idt --name slam thelink/slam
 
 # install:
 
@@ -78,9 +68,10 @@ script:
   # - sudo make install
   # - cd ../../
   
-# script:
-  # - docker cp .* slam:/SLAM
-  # - docker exec slam ./build.sh
+script:
+  - docker container ls
+  - docker cp -r .* slam:/SLAM/.
+  - docker exec slam ./build.sh
   # - mkdir build
   # - cd build
   # - cmake -DCMAKE_BUILD_TYPE=Debug ..
