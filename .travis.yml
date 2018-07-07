@@ -71,7 +71,7 @@ before_install:
 script:
   - docker container ls
   - docker cp ../SLAM/ slam:/SLAM
-  - docker exec slam cd SLAM & ./build.sh || true
+  - docker exec slam sh -c "cd SLAM; ./build.sh"
   # - mkdir build
   # - cd build
   # - cmake -DCMAKE_BUILD_TYPE=Debug ..
