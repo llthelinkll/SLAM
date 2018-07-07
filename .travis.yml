@@ -1,3 +1,5 @@
+os : thelink/slam
+
 language: cpp
 
 cache: ccache
@@ -10,8 +12,8 @@ compiler:
 
 before_install:
   - sudo apt-get update
-  - docker pull thelink/slam
-  - docker run -itd --name slam thelink/slam
+  # - docker pull thelink/slam
+  # - docker run -itd --name slam thelink/slam
 
 # install:
 
@@ -61,8 +63,8 @@ before_install:
   # - cd ../../
   
 script:
-  - docker cp .* slam:/SLAM
-  - docker exec slam ./build.sh
+  # - docker cp .* slam:/SLAM
+  # - docker exec slam ./build.sh
   # - mkdir build
   # - cd build
   # - cmake -DCMAKE_BUILD_TYPE=Debug ..
