@@ -11,7 +11,7 @@ compiler:
 before_install:
   - sudo apt-get update
   - docker pull thelink/slam
-  - docker run -itd thelink/slam /bin/bash
+  - docker run -itd --name slam thelink/slam
 
 # install:
 
@@ -61,8 +61,10 @@ before_install:
   # - cd ../../
   
 script:
-  - mkdir build
-  - cd build
-  - cmake -DCMAKE_BUILD_TYPE=Debug ..
-  - make -j4
+  - docker cp .* slam:/SLAM
+  - docker exec slam ./build.sh
+  # - mkdir build
+  # - cd build
+  # - cmake -DCMAKE_BUILD_TYPE=Debug ..
+  # - make -j4
   
