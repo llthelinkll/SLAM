@@ -11,7 +11,7 @@ compiler:
 before_install:
   - sudo apt-get update
   - docker pull thelink/slam
-  - docker run -it thelink/slam
+  - docker run -itd thelink/slam /bin/bash
 
 # install:
 
