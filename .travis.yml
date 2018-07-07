@@ -1,6 +1,3 @@
-os : thelink/slam
-dist : latest
-
 language: cpp
 
 cache: ccache
@@ -12,8 +9,7 @@ compiler:
   - gcc
 
 before_install:
-  - pwd
-  # - sudo apt-get update
+  - sudo apt-get update
   # - docker pull thelink/slam
   # - docker run -itd --name slam thelink/slam
 
