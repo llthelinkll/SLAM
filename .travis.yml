@@ -11,7 +11,8 @@ compiler:
   - gcc
 
 before_install:
-  - sudo apt-get update
+  - pwd
+  # - sudo apt-get update
   # - docker pull thelink/slam
   # - docker run -itd --name slam thelink/slam
 
