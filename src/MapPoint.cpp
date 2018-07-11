@@ -15,6 +15,9 @@ MapPoint::MapPoint(float x,float y,float z){
   mWorldPos = cv::Mat(3,1,CV_32F,tmp).clone();
 }
 
+MapPoint::~MapPoint(){
+}
+
 cv::Mat&
 MapPoint::getWorldPos(){
   return mWorldPos;

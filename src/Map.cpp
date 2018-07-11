@@ -8,6 +8,12 @@ Map::Map(){
   
 }
 
+Map::~Map(){
+  for(MapPoint* mappoint : mvpMapPoints){
+    delete(mappoint);
+  }
+}
+
 void
 Map::addMapPoint(MapPoint* mapPoint){
   std::cout << "add MapPoint " << mapPoint->getWorldPos().t() << '\n';

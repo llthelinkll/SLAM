@@ -12,6 +12,7 @@ namespace SLAM{
     friend MapDrawer;
     public:
       Map();
+      ~Map();
       
       // add new MapPoint
       void addMapPoint(MapPoint*);
