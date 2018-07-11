@@ -3,6 +3,7 @@
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/features2d/features2d.hpp>
+#include <vector>
 
 namespace SLAM{
     
@@ -12,7 +13,7 @@ namespace SLAM{
       
       ~Extractor();
       
-      cv::Mat extractFAST(const cv::Mat& image);
+      void extractFAST(const cv::Mat& image,std::vector<cv::KeyPoint>& keypoints);
     private:
       uint fastThreshold;
       uint pointRad;

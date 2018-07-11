@@ -20,6 +20,7 @@ namespace SLAM{
     private:
       Extractor* mpExtractor;
       Frame mCurrentFrame;
+      Frame mPrevFrame;
     };
 }
 

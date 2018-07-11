@@ -4,6 +4,10 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/features2d/features2d.hpp>
+#include <opencv2/features2d.hpp>
+#include <opencv2/opencv.hpp>
+#include <opencv2/videoio.hpp>
+#include <opencv2/features2d.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
 using namespace SLAM;
@@ -17,8 +21,8 @@ Extractor::~Extractor(){
   
 }
 
-cv::Mat 
-Extractor::extractFAST(const cv::Mat& image){
+void
+Extractor::extractFAST(const cv::Mat& image,std::vector<cv::KeyPoint>& keypoints){
   
   cv::Mat computedImage = image.clone();
   cv::Mat computedGrayImage;
@@ -27,25 +31,10 @@ Extractor::extractFAST(const cv::Mat& image){
   // because FAST need somthings simple like that
   cvtColor(computedImage, computedGrayImage, cv::COLOR_RGB2GRAY);
   
-  // initial keypoint
-  std::vector<cv::KeyPoint> keypoints;
+  // may be you need to blur this image
+  // cv::GaussianBlur(computedImage,computedImage,cv::Size(7,7),2,2,cv::BORDER_REFLECT_101);
   
   // start find corners by FAST
   cv::FAST(computedGrayImage,keypoints,fastThreshold);
   
-  // map keypoints to image
-  for (cv::KeyPoint& keypoint : keypoints){
-    
-    // std::cout << "keypoint : " << keypoint.pt << '\n';
-    cv::circle(computedImage,keypoint.pt,pointRad,cv::Scalar(0,255,0));
-    
-  }
-  
-  // TODO ORB
-  // TODO PTAM
-  
-  // cv::GaussianBlur(computedImage,computedImage,cv::Size(7,7),2,2,cv::BORDER_REFLECT_101);
-  
-  
-  return computedImage;
 }

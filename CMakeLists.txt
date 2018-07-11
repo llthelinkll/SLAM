@@ -14,6 +14,7 @@ set(SOURCES
   ${PROJECT_SOURCE_DIR}/src/KeyFrame.cpp 
   ${PROJECT_SOURCE_DIR}/src/Frame.cpp 
   ${PROJECT_SOURCE_DIR}/src/Tracker.cpp 
+  ${PROJECT_SOURCE_DIR}/src/Matcher.cpp 
   ${PROJECT_SOURCE_DIR}/src/Extractor.cpp 
   ${PROJECT_SOURCE_DIR}/src/FrameDrawer.cpp 
   ${PROJECT_SOURCE_DIR}/src/KeyFrameDatabase.cpp 

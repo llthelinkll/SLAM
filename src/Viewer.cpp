@@ -80,7 +80,7 @@ Viewer::run(){
       mMapDrawer->drawMapPoints();
       mFrameDrawer->drawFrame();
       
-      cv::waitKey(20);
+      cv::waitKey(1);
       
       // Swap frames and Process Events
       pangolin::FinishFrame();

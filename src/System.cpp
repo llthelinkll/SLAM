@@ -19,12 +19,14 @@ System::System(){
 
 void 
 System::inputFrame(const cv::Mat& image,double& timestamp){
+  // == TrackMonocular
   
-  float x = rand() % 10;
-  float y = rand() % 10;
-  float z = rand() % 10;
-  mMap->addMapPoint(new MapPoint(x,y,z) );
+  // float x = rand() % 10;
+  // float y = rand() % 10;
+  // float z = rand() % 10;
+  // mMap->addMapPoint(new MapPoint(x,y,z) );
   
+  // create keyframe from tracking image
   cv::Mat frame = mTracker->trackKeyFrame(image,timestamp);
   
   mViewer->updateFrame(frame);
