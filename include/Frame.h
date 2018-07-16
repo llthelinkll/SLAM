@@ -21,6 +21,7 @@ namespace SLAM{
       
       bool isUndefined = false;
       
+      void getPoints(std::vector<cv::Point2f>& points);
     private:
       
       cv::Mat mImage;

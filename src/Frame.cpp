@@ -46,3 +46,12 @@ std::vector<cv::KeyPoint>&
 Frame::getKeyPoints(){
   return mvKeyPoints;
 }
+
+void 
+Frame::getPoints(std::vector<cv::Point2f>& points){
+  points.clear();
+  points.reserve(mvKeyPoints.size());
+  for(auto keypoint : mvKeyPoints){
+    points.push_back(keypoint.pt);
+  }
+}
