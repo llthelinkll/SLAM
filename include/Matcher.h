@@ -15,7 +15,7 @@ namespace SLAM{
       
       ~Matcher();
       
-      uint matchKeyPoints(Frame* F1,Frame* F2);
+      uint matchKeyPoints(Frame* F1,Frame* F2,std::vector<cv::DMatch>& matches);
     private:
       float mThreshold;
     };

@@ -11,6 +11,7 @@
 #include <opencv2/videoio.hpp>
 #include <opencv2/features2d.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <vector>
 
 #include <Matcher.h>
 
@@ -35,20 +36,15 @@ Tracker::trackKeyFrame(const cv::Mat& image,double& timestamp){
   // extract keypoints (FAST) from image then store in Frame
   mCurrentFrame = Frame(image,timestamp,mpExtractor);
   
-  
+  // pair of keypoint index of frame1 and frame2
+  std::vector<cv::DMatch> vpMatches;
   
   Matcher matcher(0.9);
-  uint nmatches = matcher.matchKeyPoints(&mCurrentFrame,&mPrevFrame);
+  
+  // ORB matcher
+  uint nmatches = matcher.matchKeyPoints(&mCurrentFrame,&mPrevFrame,vpMatches);
   std::cout << "matcher number " << nmatches << '\n';
   
-  // std::cout << "ORB desc" << '\n';
-  // std::cout << orb_desc.size() << '\n';
-  
-  // cv::BFMatcher matcher(cv::NORM_HAMMING);
-  // std::vector<std::vector<cv::DMatch> > nn_matches;
-
-
-  // TODO ORB
   // TODO PTAM
   
   // create homography / fundamental
