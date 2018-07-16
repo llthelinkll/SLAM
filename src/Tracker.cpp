@@ -65,9 +65,9 @@ Tracker::reconstruct(std::vector<cv::DMatch>& matches){
   std::thread threadH(&Tracker::FindHomography,this,std::ref(matches),std::ref(H12));
   threadH.join();
   
-  
+  std::cout << "H : " << H12 << '\n';
   std::thread reconstructH(&Tracker::ReconstructH,this,std::ref(H12));
-  threadH.join();
+  reconstructH.join();
   // TODO create threadF for fundamental matrix initialization
 }
 
@@ -98,7 +98,7 @@ Tracker::FindHomography(std::vector<cv::DMatch>& matches,cv::Mat& H12){
   */
   size_t max_random = matches.size();
   float currentDist;
-  float bestDist = 0.0f;
+  float bestDist = -1.0f;
   for (size_t iteration = 0; iteration < mMaxIterations; ++iteration) {
     
     // random 4 correspondences
@@ -115,7 +115,7 @@ Tracker::FindHomography(std::vector<cv::DMatch>& matches,cv::Mat& H12){
     
     currentDist = CheckHomography(H12n,matches,vPoints1,vPoints2);
 
-    if(currentDist < bestDist)
+    if(currentDist < bestDist || bestDist == -1)
     {
       H12 = H12n;
       bestDist = currentDist;
