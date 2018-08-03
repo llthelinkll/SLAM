@@ -55,3 +55,12 @@ Frame::getPoints(std::vector<cv::Point2f>& points){
     points.push_back(keypoint.pt);
   }
 }
+
+void 
+Frame::getNormalizedPoints(std::vector<cv::Point2f>& points){
+  points.clear();
+  points.reserve(mvKeyPoints.size());
+  for(auto keypoint : mvKeyPoints){
+    points.push_back(keypoint.pt- cv::Point2f(mImage.rows,mImage.cols));
+  }
+}

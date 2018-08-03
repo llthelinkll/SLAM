@@ -63,12 +63,159 @@ Tracker::reconstruct(std::vector<cv::DMatch>& matches){
   
   cv::Mat H12;
   std::thread threadH(&Tracker::FindHomography,this,std::ref(matches),std::ref(H12));
+  cv::Mat F12;
+  std::thread threadF(&Tracker::FindFundamental,this,std::ref(matches),std::ref(F12));
   threadH.join();
+  threadF.join();
   
   std::cout << "H : " << H12 << '\n';
+  std::cout << "F : " << F12 << '\n';
   std::thread reconstructH(&Tracker::ReconstructH,this,std::ref(H12));
   reconstructH.join();
   // TODO create threadF for fundamental matrix initialization
+}
+
+void
+Tracker::FindFundamental(std::vector<cv::DMatch>& matches,cv::Mat& F12){
+  std::vector<cv::Point2f> vPoints1;
+  std::vector<cv::Point2f> vPoints2;
+  
+  /*
+    GET POINT2F
+    get point2f from keypoint of each Frame
+  */
+  Frame& F1 = mPrevFrame;
+  Frame& F2 = mCurrentFrame;
+  F1.getNormalizedPoints(vPoints1);
+  F2.getNormalizedPoints(vPoints2);
+  
+  std::vector<cv::Point2f> vInliersPoints1(8);
+  std::vector<cv::Point2f> vInliersPoints2(8);
+  
+  /*
+    RANSAC
+    find the best iterator which return the best homography score
+    the score from every matche points
+    ITERATIONS RANDOM INDEX
+    create random index of each iteration
+  */
+  size_t max_random = matches.size();
+  float currentDist;
+  float bestDist = -1.0f;
+  for (size_t iteration = 0; iteration < mMaxIterations; ++iteration) {
+    
+    // random 8 correspondences
+    for (size_t i = 0; i < 8; ++i) {
+      
+      // random
+      int randIdx = std::rand() % max_random;
+      
+      vInliersPoints1[i] = vPoints1[matches[randIdx].queryIdx];
+      vInliersPoints2[i] = vPoints2[matches[randIdx].trainIdx];
+    }
+    
+    cv::Mat F12n = ComputeF12(vInliersPoints1,vInliersPoints2);
+    
+    currentDist = CheckFundamental(F12n,matches,vPoints1,vPoints2);
+
+    if(currentDist < bestDist || bestDist == -1)
+    {
+      F12 = F12n;
+      bestDist = currentDist;
+    }
+  }
+}
+
+cv::Mat 
+Tracker::ComputeF12(const std::vector<cv::Point2f> &vP1, const std::vector<cv::Point2f> &vP2)
+{
+  const int N = vP1.size();
+
+  cv::Mat A(N,9,CV_32F);
+
+  for(int i=0; i<N; i++)
+  {
+    const float u1 = vP1[i].x;
+    const float v1 = vP1[i].y;
+    const float u2 = vP2[i].x;
+    const float v2 = vP2[i].y;
+
+    A.at<float>(i,0) = u1*u2;
+    A.at<float>(i,1) = u2*v1;
+    A.at<float>(i,2) = u2;
+    A.at<float>(i,3) = u1*v2;
+    A.at<float>(i,4) = v2*v1;
+    A.at<float>(i,5) = v2;
+    A.at<float>(i,6) = v2;
+    A.at<float>(i,7) = v1;
+    A.at<float>(i,8) = 1;
+    
+  }
+
+  cv::Mat u,w,vt;
+
+  cv::SVDecomp(A,w,u,vt,cv::SVD::MODIFY_A | cv::SVD::FULL_UV);
+  
+  cv::Mat Fpre = vt.row(8).reshape(0, 3);
+  
+  cv::SVDecomp(Fpre,w,u,vt,cv::SVD::MODIFY_A | cv::SVD::FULL_UV);
+
+  w.at<float>(2)=0;
+
+  return  u*cv::Mat::diag(w)*vt;
+}
+
+float 
+Tracker::CheckFundamental(cv::Mat& F12n,std::vector<cv::DMatch>& matches,std::vector<cv::Point2f>& vPoints1,std::vector<cv::Point2f>& vPoints2){
+  
+  const float f11 = F12n.at<float>(0,0);
+  const float f12 = F12n.at<float>(0,1);
+  const float f13 = F12n.at<float>(0,2);
+  const float f21 = F12n.at<float>(1,0);
+  const float f22 = F12n.at<float>(1,1);
+  const float f23 = F12n.at<float>(1,2);
+  const float f31 = F12n.at<float>(2,0);
+  const float f32 = F12n.at<float>(2,1);
+  const float f33 = F12n.at<float>(2,2);
+  
+  // sum of distance
+  float totalDist = 0;
+  
+  for (auto match : matches){
+      
+      // input
+      float u1 = vPoints1[match.queryIdx].x;
+      float v1 = vPoints1[match.queryIdx].y;
+      float u2 = vPoints2[match.trainIdx].x;
+      float v2 = vPoints2[match.trainIdx].y;
+      
+      // Reprojection error in second image
+      // l2 = F*x1 = (a2,b2,c2)
+
+      const float a2 = f11*u1+f12*v1+f13;
+      const float b2 = f21*u1+f22*v1+f23;
+      const float c2 = f31*u1+f32*v1+f33;
+
+      const float num2 = a2*u2+b2*v2+c2;
+
+      const float squareDist1 = num2*num2;
+      
+      // Reprojection error in first image
+      // l1 = F*x2 = (a1,b1,c1)
+
+      const float a1 = f11*u2+f12*v2+f13;
+      const float b1 = f21*u2+f22*v2+f23;
+      const float c1 = f31*u2+f32*v2+f33;
+
+      const float num1 = a1*u1+b1*v1+c1;
+
+      const float squareDist2 = num1*num1;
+      
+      totalDist += squareDist1 + squareDist2;
+  }
+  
+  // NOTE: becareful when totalDist is leak
+  return totalDist;
 }
 
 void 
@@ -83,8 +230,8 @@ Tracker::FindHomography(std::vector<cv::DMatch>& matches,cv::Mat& H12){
   */
   Frame& F1 = mPrevFrame;
   Frame& F2 = mCurrentFrame;
-  F1.getPoints(vPoints1);
-  F2.getPoints(vPoints2);
+  F1.getNormalizedPoints(vPoints1);
+  F2.getNormalizedPoints(vPoints2);
   
   std::vector<cv::Point2f> vInliersPoints1(4);
   std::vector<cv::Point2f> vInliersPoints2(4);
