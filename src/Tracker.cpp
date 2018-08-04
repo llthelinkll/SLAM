@@ -435,27 +435,73 @@ Tracker::DecomposeE(cv::Mat& E12,cv::Mat& R2,cv::Mat& bx,std::vector<cv::DMatch>
   t=t/cv::norm(t);
   std::cout << "t : " << t << '\n';
   
+  std::vector<cv::Point3f> vP3D1, vP3D2, vP3D3, vP3D4;
+  std::vector<uint> vNGood = {0,0,0,0};
   cv::Mat bx_,R2_;
+  
   // possibility 1 : Z * W
   bx_ = u*Z*u.t();
   R2_ = u*W*vt;
-  CheckRbx(R2_,bx_,matches);
-  std::cout << "bx : " << bx_ << '\n';
+  std::cout << "bx_ : " << bx_ << '\n';
+  vNGood[0] = CheckRbx(R2_,bx_,matches,vP3D1);
   
-  // possibility 1 : Zt * Wt
-  // possibility 2 : -Z * Wt
-  // possibility 3 : -Zt * W
+  // possibility 2 : Zt * Wt
+  bx_ = u*Z.t()*u.t();
+  R2_ = u*W.t()*vt;
+  std::cout << "bx_ : " << bx_ << '\n';
+  vNGood[1] = CheckRbx(R2_,bx_,matches,vP3D2);
   
+  // possibility 3 : -Z * Wt
+  bx_ = -u*Z*u.t();
+  R2_ = u*W.t()*vt;
+  std::cout << "bx_ : " << bx_ << '\n';
+  vNGood[3] = CheckRbx(R2_,bx_,matches,vP3D3);
   
-  // why we need the code below
-  // if(cv::determinant(R2)<0)
-  //     R2=-R2;
+  // possibility 4 : -Zt * W
+  bx_ = -u*Z.t()*u.t();
+  R2_ = u*W*vt;
+  std::cout << "bx_ : " << bx_ << '\n';
+  vNGood[4] = CheckRbx(R2_,bx_,matches,vP3D4);
+  
+  // OPTIMIZE: I think CheckRbx, 3 possibility will alway fail.
+  // should we check only 1 point?
+  std::vector<uint>::iterator max_elem = std::max_element(vNGood.begin(),vNGood.end());
+  size_t dist = std::distance(max_elem,vNGood.begin());
+  
+  std::vector<cv::Point3f> vP3D;
+  if (dist == 0){
+    vP3D = vP3D1;
+  }else if(dist == 1){
+    vP3D = vP3D2;
+  }else if(dist == 2){
+    vP3D = vP3D3;
+  }else if(dist == 3){
+    vP3D = vP3D4;
+  }
+  
+  // TODO: add point which corresponse to previous map!!
+  // add map point
+  for (auto P3D : vP3D){
+    mMap->addMapPoint(new MapPoint(P3D.x,P3D.y,P3D.z));
+  }
 
   
 }
 
-bool 
-Tracker::CheckRbx(cv::Mat& R2,cv::Mat& bx,std::vector<cv::DMatch>& matches){
+uint 
+Tracker::CheckRbx(cv::Mat& R2,cv::Mat& bx,std::vector<cv::DMatch>& matches,std::vector<cv::Point3f>& vP3D){
+  
+  // number of good point from this R2 and bx
+  uint nGood = 0;
+  
+  // Threshold for re-projection
+  float th2 = 4;
+  
+  // from calibration
+  const float fx = K.at<float>(0,0);
+  const float fy = K.at<float>(1,1);
+  const float cx = K.at<float>(0,2);
+  const float cy = K.at<float>(1,2);
   
   // get vector from skew matrix
   cv::Mat t(3,1,CV_32F,cv::Scalar(0));
@@ -490,22 +536,84 @@ Tracker::CheckRbx(cv::Mat& R2,cv::Mat& bx,std::vector<cv::DMatch>& matches){
       const cv::Point2f& kp1 = vPoints1[match.queryIdx];
       const cv::Point2f& kp2 = vPoints2[match.trainIdx];
       
-      cv::Mat p3d;
+      cv::Mat p3dC1;
 
       // I think this function will do intersection of vector for us
       // the triangle of epipolar planar !!!!
-      Triangulate(kp1,kp2,P1,P2,p3d);
+      Triangulate(kp1,kp2,P1,P2,p3dC1);
       
-      // std::cout << "3d point!! : " << p3d << '\n';
-      float x  = p3d.at<float>(0,0);
-      float y  = p3d.at<float>(0,1);
-      float z  = p3d.at<float>(0,2);
-      mMap->addMapPoint(new MapPoint(x,y,z) );
+      // TODO: I don't understand this
+      // if(isfinite(p3dC1.at<float>(0)) || isfinite(p3dC1.at<float>(1)) || isfinite(p3dC1.at<float>(2)))
+      // {
+      //     continue;
+      // }
+      
+      // NOTE: when 2 vector is quite parallel (infinity)
+      // Check parallax
+      cv::Mat normal1 = p3dC1 - O1;
+      float dist1 = cv::norm(normal1);
+      
+      cv::Mat normal2 = p3dC1 - O2;
+      float dist2 = cv::norm(normal2);
+      
+      float cosParallax = normal1.dot(normal2)/(dist1*dist2);
+      
+      // 2 vector should not be parallax (quite parallel)
+      if (cosParallax >= 0.99998){
+        continue;
+      }
+      
+      // 3D point must stay in front of both camera
+      // Check depth in front of first camera (only if enough parallax, as "infinite" points can easily go to negative depth)
+      if(p3dC1.at<float>(2)<=0)
+          continue;
+
+      // Check depth in front of second camera (only if enough parallax, as "infinite" points can easily go to negative depth)
+      cv::Mat p3dC2 = R2*p3dC1+t;
+
+      if(p3dC2.at<float>(2)<=0)
+          continue;
+          
+      // NOTE: when you re-project from 3d to 2d image
+      // we should get nearby point
+      
+      // Check reprojection error in first image
+      float im1x, im1y;
+      float invZ1 = 1.0/p3dC1.at<float>(2);
+      im1x = fx*p3dC1.at<float>(0)*invZ1+cx;
+      im1y = fy*p3dC1.at<float>(1)*invZ1+cy;
+
+      float squareError1 = (im1x-kp1.x)*(im1x-kp1.x)+(im1y-kp1.y)*(im1y-kp1.y);
+
+      if(squareError1>th2)
+          continue;
+
+      // Check reprojection error in second image
+      float im2x, im2y;
+      float invZ2 = 1.0/p3dC2.at<float>(2);
+      im2x = fx*p3dC2.at<float>(0)*invZ2+cx;
+      im2y = fy*p3dC2.at<float>(1)*invZ2+cy;
+
+      float squareError2 = (im2x-kp2.x)*(im2x-kp2.x)+(im2y-kp2.y)*(im2y-kp2.y);
+
+      if(squareError2>th2)
+          continue;
+      
+      float& x  = p3dC1.at<float>(0,0);
+      float& y  = p3dC1.at<float>(0,1);
+      float& z  = p3dC1.at<float>(0,2);        
+      
+      // append 3d point
+      vP3D.push_back({x,y,z});
+      
+      // count number of good points
+      ++nGood;
+      // std::cout << "3d point!! : " << p3dC1 << '\n';
       
     }
       
   
-  return true;
+  return nGood;
 }
 
 void 

@@ -41,7 +41,7 @@ namespace SLAM{
       
       void DecomposeE(cv::Mat& E12,cv::Mat& R2,cv::Mat& bx,std::vector<cv::DMatch>& matches);
       
-      bool CheckRbx(cv::Mat& R2,cv::Mat& bx,std::vector<cv::DMatch>& matches);
+      uint CheckRbx(cv::Mat& R2,cv::Mat& bx,std::vector<cv::DMatch>& matches,std::vector<cv::Point3f>& vP3D);
       
       void Triangulate(const cv::Point2f& p1,const cv::Point2f& p2,cv::Mat& P1,cv::Mat& P2,cv::Mat& p3d);
     };
