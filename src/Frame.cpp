@@ -32,13 +32,13 @@ Frame::~Frame(){
 cv::Mat&
 Frame::getCurrentFrame(){
   
-  // size_t pointRad = 5;
-  // for (cv::KeyPoint& keypoint : mvKeyPoints){
-  // 
-  //   // std::cout << "keypoint : " << keypoint.pt << '\n';
-  //   cv::circle(mImage,keypoint.pt,pointRad,cv::Scalar(0,255,0));
-  // 
-  // }
+  size_t pointRad = 5;
+  for (cv::KeyPoint& keypoint : mvKeyPoints){
+  
+    // std::cout << "keypoint : " << keypoint.pt << '\n';
+    cv::circle(mImage,keypoint.pt,pointRad,cv::Scalar(0,255,0));
+  
+  }
   return mImage;
 }
 

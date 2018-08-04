@@ -8,9 +8,9 @@
 
 using namespace SLAM;
 
-System::System(){
-  mTracker = new Tracker();
+System::System(cv::Mat& K){
   mMap = new Map();
+  mTracker = new Tracker(K,mMap);
   mViewer = new Viewer(mMap);
   
   // run viewer as daemon thread

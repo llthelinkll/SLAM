@@ -14,7 +14,7 @@ namespace SLAM{
     
     class System{
     public:
-      System();
+      System(cv::Mat& K);
       ~System();
       
       // add input

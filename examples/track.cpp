@@ -27,11 +27,25 @@ int main(int argc, char const *argv[]) {
   
   std::string datasetPath = "/home/thanakorn/Desktop/gits/SLAM/datasets/rgbd";
   std::string dataFile = datasetPath + "/rgb.txt";
+  std::string strSettingPath = datasetPath + "/TUM1.yaml";
   std::vector<std::string> vsImageFilenames;
   std::vector<double> vdTimeStamps;
   LoadImages(dataFile,vsImageFilenames,vdTimeStamps);
   
-  System sys = System();
+  // calibration parameters
+  cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
+  float fx = fSettings["Camera.fx"];
+  float fy = fSettings["Camera.fy"];
+  float cx = fSettings["Camera.cx"];
+  float cy = fSettings["Camera.cy"];
+
+  cv::Mat K = cv::Mat::eye(3,3,CV_32F);
+  K.at<float>(0,0) = fx;
+  K.at<float>(1,1) = fy;
+  K.at<float>(0,2) = cx;
+  K.at<float>(1,2) = cy;
+  
+  System sys = System(K);
   
   size_t n = vsImageFilenames.size();
   
