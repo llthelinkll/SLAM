@@ -1,6 +1,7 @@
 #include <Tracker.h>
 #include <Extractor.h>
 #include <KeyFrame.h>
+#include <Frame.h>
 #include <MapPoint.h>
 #include <Map.h>
 
@@ -471,20 +472,42 @@ Tracker::DecomposeE(cv::Mat& E12,cv::Mat& R2,cv::Mat& bx,std::vector<cv::DMatch>
   std::vector<cv::Point3f> vP3D;
   if (dist == 0){
     vP3D = vP3D1;
+    bx = bx_;
+    R2 = R2_;
   }else if(dist == 1){
     vP3D = vP3D2;
+    bx = bx_;
+    R2 = R2_;
   }else if(dist == 2){
     vP3D = vP3D3;
+    bx = bx_;
+    R2 = R2_;
   }else if(dist == 3){
     vP3D = vP3D4;
+    bx = bx_;
+    R2 = R2_;
   }
   
-  // TODO: add point which corresponse to previous map!!
+  // update baseline and rotation matrix to current frame
+  float x = -bx.at<float>(1,2);
+  float y = bx.at<float>(0,2);
+  float z = -bx.at<float>(0,1);
+  cv::Point3f F2P3D = {x,y,z};
+  F2P3D += mPrevFrame.P3D;
+  
+  std::cout << "frame F1P3D: " << mPrevFrame.P3D << '\n';
+  std::cout << "frame F2P3D: " << F2P3D << '\n';
+  mCurrentFrame.update(F2P3D,R2);
+  
+  KeyFrame* keyFrame = new KeyFrame(mPrevFrame,mCurrentFrame);
+  
   // add map point
   for (auto P3D : vP3D){
-    mMap->addMapPoint(new MapPoint(P3D.x,P3D.y,P3D.z));
+    MapPoint* mappoint = new MapPoint(P3D.x,P3D.y,P3D.z);
+    keyFrame->addMapPoint(mappoint);
+    mMap->addMapPoint(mappoint);
   }
-
+  mMap->addKeyFrame(keyFrame);
   
 }
 

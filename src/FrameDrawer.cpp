@@ -21,4 +21,5 @@ FrameDrawer::drawFrame(){
   }
   cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE );
   cv::imshow("Display window",mCurrentImage);
+  cv::waitKey(1);
 }

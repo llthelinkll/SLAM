@@ -23,6 +23,13 @@ namespace SLAM{
       
       void getPoints(std::vector<cv::Point2f>& points);
       void getNormalizedPoints(std::vector<cv::Point2f>& points);
+      void update(cv::Point3f& b,cv::Mat& R2);
+      
+      // point in 3D world
+      cv::Point3f P3D;
+      
+      // rotation matrix
+      cv::Mat R;
     private:
       
       cv::Mat mImage;

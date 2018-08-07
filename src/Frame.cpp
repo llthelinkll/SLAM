@@ -22,11 +22,19 @@ Frame::Frame(const cv::Mat& image,double& timestamp,Extractor* extractor){
   
   this->mImage = image.clone();
   extractor->extractFAST(image,mvKeyPoints);
+  
+  R = cv::Mat::eye(3,3,CV_32F);
 }
 
 
 Frame::~Frame(){
   
+}
+
+void 
+Frame::update(cv::Point3f& b,cv::Mat& R2){
+  P3D = b;
+  R = R2;
 }
 
 cv::Mat&

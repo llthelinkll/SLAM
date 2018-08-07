@@ -7,6 +7,7 @@
 namespace SLAM{
     
     class MapPoint;
+    class KeyFrame;
     class MapDrawer;
     class Map{
     friend MapDrawer;
@@ -16,12 +17,15 @@ namespace SLAM{
       
       // add new MapPoint
       void addMapPoint(MapPoint*);
+      void addKeyFrame(KeyFrame*);
       std::vector<MapPoint*>& getMapPoints();
+      std::vector<KeyFrame*>& getKeyFrames();
       
       // DO NOT UPDATE this Map when someone is updating it
       std::mutex mMutexMap;
     protected:
       std::vector<MapPoint*> mvpMapPoints;
+      std::vector<KeyFrame*> mvpKeyFrames;
     };
 }
 
